@@ -198,7 +198,24 @@ pub extern "C" fn Uint8Array_new() -> Uint8Array {
 #[no_mangle]
 pub extern "C" fn Uint8Array_as_ptr(arr: *mut Uint8Array) -> *mut u8 {
 	unsafe {
-		(&*arr).as_mut_ptr()
+		if !arr.is_null() {
+			(&*arr).as_mut_ptr()
+		}
+		else {
+			std::ptr::null_mut()
+		}
+	}
+}
+
+#[no_mangle]
+pub extern "C" fn Uint8Array_len(arr: *const Uint8Array) -> usize {
+	unsafe {
+		if !arr.is_null() {
+			(&*arr).len()
+		}
+		else {
+			0
+		}
 	}
 }
 
@@ -206,5 +223,37 @@ pub extern "C" fn Uint8Array_as_ptr(arr: *mut Uint8Array) -> *mut u8 {
 pub extern "C" fn Uint8Array_push(arr: *mut Uint8Array, element: u8) {
 	unsafe {
 		(&mut *arr).push(element);
+	}
+}
+
+/// Removes the last item from the list and returns it.
+/// If the list is empty, it returns 0.
+/// However, a list can have 0 as its last value and
+/// care should be taken while using this method.
+/// 
+/// Firstly check the length of the array with the len() method.
+/// If it is not 0, call the pop method and do something with the
+/// value, otherwise, don't call the pop method.
+/// 
+/// ```c
+/// void main() {
+/// 	Uint8Array arr = Uint8Array_new();
+/// 	Uint8Array_push(&arr, 12);
+/// 	Uint8Array_push(&arr, 14);
+/// 	if (Uint8Array_length(&arr) != 0) {
+/// 		printf("The last value is: ", Uint8Array_pop(&arr));
+/// 	}
+/// 	else {
+/// 		printf("The array is empty");
+/// 	}
+/// }
+/// ```
+#[no_mangle]
+pub extern "C" fn Uint8Array_pop(arr: *mut Uint8Array) -> u8 {
+	unsafe {
+		match (&mut *arr).pop() {
+			Some(n) => n,
+			None =>  0,
+		}
 	}
 }
